@@ -10,15 +10,15 @@ export async function updateMovieById(id, update) {
   return await client
     .db("b40wd")
     .collection("movies")
-    .updateOne({ id: id }, { $set: update });
+    .updateOne({ _id: id }, { $set: update });
 }
 
 export async function deleteMovieById(id) {
-  return await client.db("b40wd").collection("movies").deleteOne({ id: id });
+  return await client.db("b40wd").collection("movies").deleteOne({ _id: id });
 }
 
 export async function getMovieById(id) {
-  return await client.db("b40wd").collection("movies").findOne({ id: id });
+  return await client.db("b40wd").collection("movies").findOne({ _id: id });
 }
 
 export async function getAllMovies(req) {
