@@ -4,9 +4,13 @@
 import express from "express";
 import * as dotenv from "dotenv";
 import { MongoClient } from "mongodb";
+import moviesRouter from "./routes/movies.routes.js";
+import userRouter from "./routes/user.routes.js";
+import cors from "cors";
+
 dotenv.config();
 const app = express();
-console.log(process.env.MONGO_URL);
+//console.log(process.env.MONGO_URL);
 
 const PORT = process.env.PORT;
 //const MONGO_URL = "mongodb://127.0.0.1";
@@ -14,7 +18,7 @@ const MONGO_URL = process.env.MONGO_URL;
 
 const client = new MongoClient(MONGO_URL);
 await client.connect();
-console.log("connected");
+console.log(`Connnected on the port${PORT}`);
 
 // for connection
 
@@ -26,70 +30,27 @@ console.log("connected");
 // for every post method thids line converts to JSON format
 
 app.use(express.json());
+app.use(cors());
 
 app.get("/", (req, res) => {
   res.send("working with nodemon");
 });
 //_________________________________________________________________________________________
 
-app.get("/movies", async (req, res) => {
-  if (req.query.rating) {
-    req.query.rating = +req.query.rating;
-  }
+app.use("/movies", moviesRouter);
+app.use("/user", userRouter);
+export { client };
 
-  const particular = await client
-    .db("b40wd")
-    .collection("movies")
-    .find(req.query)
-    .toArray();
+// hashPass
 
-  res.send(particular);
-});
+// const generateHashPass = async (userPass) => {
+//   const NO_OF_ROUNDS = 10;
+//   const salt = await bcrypt.genSalt(NO_OF_ROUNDS);
+//   const hashPass = await bcrypt.hash(userPass, salt);
+//   console.log(salt);
+//   console.log(hashPass);
+// };
 
-app.get("/movies/:id", async (req, res) => {
-  const { id } = req.params;
-  //const particular = movies.find((movie) => movie.id == id);
-  const particular = await client
-    .db("b40wd")
-    .collection("movies")
-    .findOne({ id: id });
-  particular
-    ? res.send(particular)
-    : res.status(404).send({ msg: "movie not fond" });
-});
-
-//delete
-app.delete("/movies/:id", async (req, res) => {
-  const { id } = req.params;
-  //const particular = movies.find((movie) => movie.id == id);
-  const result = await client
-    .db("b40wd")
-    .collection("movies")
-    .deleteOne({ id: id });
-  result.deletedCount > 0
-    ? res.send({ msg: `deleated movie with id ${id} successfully` })
-    : res.status(404).send({ msg: "Given id is not valid" });
-  console.log("deleated");
-});
-
-//update
-app.put("/movies/:id", async (req, res) => {
-  const { id } = req.params;
-  const update = req.body;
-  const result = await client
-    .db("b40wd")
-    .collection("movies")
-    .updateOne({ id: id }, { $set: update });
-  console.log(update);
-  res.send(result);
-});
-
-//post
-app.post("/movies", async (req, res) => {
-  const newData = req.body;
-  //console.log(newData);
-  const add = await client.db("b40wd").collection("movies").insertMany(newData);
-  res.send(add);
-});
+// generateHashPass("qwerty123");
 
 app.listen(PORT, () => console.log(`server is in the port${PORT}`));
